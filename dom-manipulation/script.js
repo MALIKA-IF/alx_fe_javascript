@@ -103,3 +103,29 @@ function importFromJsonFile(event) {
     };
     fileReader.readAsText(event.target.files[0]);
   }
+
+  function populateCategories() {
+    const drop = document.getElementById('categoryFilter');
+    
+  
+    drop.innerHTML = '<option value="">-- Select a category --</option>';
+
+    // Use a Set to store unique categories
+    const categories = new Set();
+    quotes.forEach(quote => {
+        if (quote.category) {
+            categories.add(quote.category.trim());
+        }
+    });
+
+    // Convert Set to array and sort
+    const sortedCategories = Array.from(categories).sort();
+
+    // Populate dropdown
+    sortedCategories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        dropdown.appendChild(option);
+    });
+}
