@@ -118,11 +118,11 @@ function importFromJsonFile(event) {
         }
     });
 
-    // Convert Set to array and sort
+    
     const sortedCategories = Array.from(categories).sort();
 
-    // Populate dropdown
-    sortedCategories.forEach(category => {
+   
+    sortedCategories.map(category => {
         const option = document.createElement('option');
         option.value = category;
         option.textContent = category;
