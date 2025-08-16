@@ -129,3 +129,25 @@ function importFromJsonFile(event) {
         dropdown.appendChild(option);
     });
 }
+
+function filterQuotes() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    
+    const filteredQuotes = selectedCategory
+        ? quotes.filter(quote => quote.category === selectedCategory)
+        : quotes;
+
+    if (filteredQuotes.length === 0) {
+        displayDiv.innerHTML = `<p>No quotes found for this category.</p>`;
+        return;
+    }
+
+    filteredQuotes.forEach(quote => {
+        const quoteElement = document.createElement('div');
+        quoteElement.innerHTML = `
+            <p><strong>Quote:</strong> "${quote.text}"</p>
+            <p><strong>Category:</strong> ${quote.category}</p>
+            <hr />
+        `;
+    });
+}
