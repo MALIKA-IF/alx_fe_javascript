@@ -1,5 +1,5 @@
 
-const quote =[{text : "quotes 1" , category : 1},
+const quotes =[{text : "quotes 1" , category : 1},
     {Text : "quotes 2" , category : 2},
     {Text : "quotes 3" , category : 3}
 
@@ -7,11 +7,14 @@ const quote =[{text : "quotes 1" , category : 1},
 
 function showRandomQuote(){
 
-    const display = document.getElementById("newQuote");
+   const randomIndex = Math.floor(Math.random() * quotes.length);
+    const quote = quotes[randomIndex];
 
-    display.addEventListener('click', () =>{
-        console.log(quote);
-    })
+    const display = document.getElementById('quoteDisplay');
+    display.innerHTML = `
+        <p>Quote: "${quote.text}"</p>
+        <p>Category: ${quote.category}</p>
+    `;
 }
 
 showRandomQuote()
