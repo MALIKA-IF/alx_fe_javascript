@@ -17,14 +17,9 @@ function showRandomQuote(){
     `;
 }
 
-showRandomQuote()
 function createAddQuoteForm() {
     const formContainer = document.getElementById('formContainer');
 
-    // Clear existing form if any
-    formContainer.innerHTML = '';
-
-    // Create form elements
     const form = document.createElement('form');
 
     const textInput = document.createElement('input');
@@ -44,7 +39,7 @@ function createAddQuoteForm() {
     
     form.appendChild(textInput);
     form.appendChild(categoryInput);
-    form.appendChild(submitBtn);
+    form.appendChild(submit);
 
     
     form.addEventListener('submit', function (e) {
@@ -63,12 +58,17 @@ function createAddQuoteForm() {
         alert('Quote added successfully!');
     });
 
-    formContainer.appendChild(form);
+   // formContainer.appendChild(form);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('showQuoteBtn').addEventListener('click', showRandomQuote);
+    document.getElementById('newQuote').addEventListener('click', showRandomQuote);
     document.getElementById('addQuoteBtn').addEventListener('click', createAddQuoteForm);
 });
 
-createAddQuoteForm()
+function LocalStorageQotes() {
+    const savedQuotes = localStorage.getItem('quotes');
+    if (savedQuotes) {
+        quotes = JSON.parse(savedQuotes);
+    }
+}
