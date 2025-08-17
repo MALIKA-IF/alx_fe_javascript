@@ -151,3 +151,57 @@ function filterQuotes() {
         `;
     });
 }
+
+const postsDiv = document.getElementById('posts');
+
+    // Fetch data from API every 5 seconds
+    function startFetchingData() {
+      fetchData(); // initial call
+      setInterval(fetchData, 5000); // repeat every 5s
+    }
+
+    // GET data
+    async function fetchData() {
+      try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+        const data = await response.json();
+        renderPosts(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    // Render posts
+    function renderPosts(posts) {
+      postsDiv.innerHTML = '';
+      posts.forEach(post => {
+        const div = document.createElement('div');
+        div.innerHTML = `<h3>${post.title}</h3><p>${post.body}</p><hr>`;
+        postsDiv.appendChild(div);
+      });
+    }
+
+    // POST data
+    async function postData() {
+      const newPost = {
+        title: 'New Post Title',
+        body: 'This is the content of the new post.',
+        userId: 1
+      };
+
+      try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newPost)
+        });
+        const result = await response.json();
+        console.log('Posted:', result);
+        alert('New post submitted! Check console.');
+      } catch (error) {
+        console.error('Error posting data:', error);
+      }
+    }
+
+    // Start everything
+    startFetchingData();
