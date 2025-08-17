@@ -376,7 +376,7 @@ const postsDiv = document.getElementById('posts');
       if (remaining.length === 0) {
         // Done resolving
         saveQuotesToLocal(base);
-        showNotification('All conflicts resolved and saved.');
+        showNotification('Quotes synced with server!');
         renderQuotes();
         window._pendingConflicts = null;
         window._pendingBaseQuotes = null;
