@@ -155,7 +155,7 @@ function filterQuotes() {
 const postsDiv = document.getElementById('posts');
 
     // Fetch data from API every 5 seconds
-    function startFetchingData() {
+    function fetchQuotesFromServer() {
       fetchData(); // initial call
       setInterval(fetchData, 5000); // repeat every 5s
     }
