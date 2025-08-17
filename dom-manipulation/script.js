@@ -211,7 +211,7 @@ const postsDiv = document.getElementById('posts');
     const FETCH_INTERVAL = 10000; // 10 seconds
 
     // Fetch quotes from server
-    async function fetchQuotesFromServer() {
+    async function syncQuotes() {
       try {
         const response = await fetch(API_URL);
         const serverQuotes = await response.json();
@@ -262,5 +262,5 @@ const postsDiv = document.getElementById('posts');
     }
 
     // Initial fetch and periodic update
-    fetchQuotesFromServer(); // Initial load
+    syncQuotes(); // Initial load
     setInterval(fetchQuotesFromServer, FETCH_INTERVAL);
