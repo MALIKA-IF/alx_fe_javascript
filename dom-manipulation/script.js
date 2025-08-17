@@ -205,3 +205,62 @@ const postsDiv = document.getElementById('posts');
 
     // Start everything
     startFetchingData();
+
+    const API_URL = 'https://jsonplaceholder.typicode.com/posts?_limit=5';
+    const STORAGE_KEY = 'quotes';
+    const FETCH_INTERVAL = 10000; // 10 seconds
+
+    // Fetch quotes from server
+    async function fetchQuotesFromServer() {
+      try {
+        const response = await fetch(API_URL);
+        const serverQuotes = await response.json();
+        updateLocalStorage(serverQuotes);
+        renderQuotes();
+      } catch (error) {
+        console.error('Failed to fetch quotes:', error);
+      }
+    }
+
+    // Get quotes from local storage
+    function getLocalQuotes() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    // Update local storage with server data (server wins conflicts)
+    function updateLocalStorage(serverQuotes) {
+      const localQuotes = getLocalQuotes();
+      const mergedQuotes = [];
+
+      serverQuotes.forEach(serverQuote => {
+        const localQuote = localQuotes.find(q => q.id === serverQuote.id);
+
+        if (!localQuote || JSON.stringify(localQuote) !== JSON.stringify(serverQuote)) {
+          // New or updated quote (server takes precedence)
+          mergedQuotes.push(serverQuote);
+        } else {
+          // No change, keep local
+          mergedQuotes.push(localQuote);
+        }
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedQuotes));
+    }
+
+    // Render quotes to the DOM
+    function renderQuotes() {
+      const quotes = getLocalQuotes();
+      const quoteList = document.getElementById('quoteList');
+      quoteList.innerHTML = '';
+
+      quotes.forEach(quote => {
+        const div = document.createElement('div');
+        div.innerHTML = `<strong>${quote.title}</strong><p>${quote.body}</p><hr>`;
+        quoteList.appendChild(div);
+      });
+    }
+
+    // Initial fetch and periodic update
+    fetchQuotesFromServer(); // Initial load
+    setInterval(fetchQuotesFromServer, FETCH_INTERVAL);
