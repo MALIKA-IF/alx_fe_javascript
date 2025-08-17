@@ -264,3 +264,142 @@ const postsDiv = document.getElementById('posts');
     // Initial fetch and periodic update
     syncQuotes(); // Initial load
     setInterval(fetchQuotesFromServer, FETCH_INTERVAL);
+
+    const API_URL = 'https://jsonplaceholder.typicode.com/posts?_limit=5';
+    const STORAGE_KEY = 'quotes';
+    const FETCH_INTERVAL = 10000; // 10s
+
+    const notificationDiv = document.getElementById('notification');
+    const quoteList = document.getElementById('quoteList');
+
+    function showNotification(message, duration = 3000) {
+      notificationDiv.textContent = message;
+      notificationDiv.style.display = 'block';
+      setTimeout(() => {
+        notificationDiv.style.display = 'none';
+      }, duration);
+    }
+
+    function getLocalQuotes() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function saveQuotesToLocal(quotes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
+    }
+
+    // Detect and optionally resolve conflicts
+    function updateLocalStorage(serverQuotes) {
+      const localQuotes = getLocalQuotes();
+      let updated = false;
+      const newQuotes = [];
+      const conflicts = [];
+
+      serverQuotes.forEach(serverQuote => {
+        const localQuote = localQuotes.find(q => q.id === serverQuote.id);
+
+        if (!localQuote) {
+          // New quote from server
+          newQuotes.push(serverQuote);
+          updated = true;
+        } else if (JSON.stringify(localQuote) !== JSON.stringify(serverQuote)) {
+          // Conflict detected
+          conflicts.push({ local: localQuote, server: serverQuote });
+        } else {
+          newQuotes.push(localQuote); // No changes
+        }
+      });
+
+      if (conflicts.length > 0) {
+        showNotification(`Conflicts detected. Manual resolution required.`);
+        renderConflicts(conflicts, newQuotes);
+      } else {
+        if (updated) {
+          showNotification('New quotes fetched and updated.');
+        }
+        saveQuotesToLocal(newQuotes);
+        renderQuotes();
+      }
+    }
+
+    // Render quotes in the UI
+    function renderQuotes() {
+      const quotes = getLocalQuotes();
+      quoteList.innerHTML = '';
+      quotes.forEach(quote => {
+        const div = document.createElement('div');
+        div.className = 'quote';
+        div.innerHTML = `<strong>${quote.title}</strong><p>${quote.body}</p>`;
+        quoteList.appendChild(div);
+      });
+    }
+
+    // Render conflicts and allow manual resolution
+    function renderConflicts(conflicts, baseQuotes) {
+      quoteList.innerHTML = '';
+
+      conflicts.forEach(({ local, server }) => {
+        const container = document.createElement('div');
+        container.className = 'conflict';
+
+        container.innerHTML = `
+          <p><strong>Conflict on Quote ID ${server.id}</strong></p>
+          <div><strong>Server:</strong> <em>${server.title}</em> - ${server.body}</div>
+          <div><strong>Local:</strong> <em>${local.title}</em> - ${local.body}</div>
+          <button class="btn btn-primary" onclick="resolveConflict(${server.id}, 'server')">Keep Server</button>
+          <button class="btn btn-secondary" onclick="resolveConflict(${server.id}, 'local')">Keep Local</button>
+        `;
+
+        quoteList.appendChild(container);
+      });
+
+      // Store unresolved quotes temporarily
+      window._pendingBaseQuotes = baseQuotes;
+      window._pendingConflicts = conflicts;
+    }
+
+    // Resolve conflict manually
+    function resolveConflict(id, choice) {
+      const base = window._pendingBaseQuotes || [];
+      const conflicts = window._pendingConflicts || [];
+
+      const conflict = conflicts.find(c => c.server.id === id);
+      if (!conflict) return;
+
+      const selected = choice === 'server' ? conflict.server : conflict.local;
+      base.push(selected);
+
+      // Remove this conflict
+      const remaining = conflicts.filter(c => c.server.id !== id);
+
+      if (remaining.length === 0) {
+        // Done resolving
+        saveQuotesToLocal(base);
+        showNotification('All conflicts resolved and saved.');
+        renderQuotes();
+        window._pendingConflicts = null;
+        window._pendingBaseQuotes = null;
+      } else {
+        // Render remaining
+        window._pendingBaseQuotes = base;
+        window._pendingConflicts = remaining;
+        renderConflicts(remaining, base);
+      }
+    }
+
+    // Periodic fetching
+    async function fetchQuotesFromServer() {
+      try {
+        const res = await fetch(API_URL);
+        const serverQuotes = await res.json();
+        updateLocalStorage(serverQuotes);
+      } catch (error) {
+        showNotification('Failed to fetch data from server.');
+        console.error(error);
+      }
+    }
+
+    // Init
+    fetchQuotesFromServer(); // Initial fetch
+    setInterval(fetchQuotesFromServer, FETCH_INTERVAL);
